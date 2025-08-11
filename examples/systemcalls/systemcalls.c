@@ -16,6 +16,15 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
+    int result = system(cmd);
+
+    // If system() returns -1, it means there was an error in invoking the command  
+    if (result == 0) {
+        printf ("Command %s executed successfully!\n", cmd);
+    } else {
+        printf ("Command execution failed: %d\n", result);
+        return false;
+    }
 
     return true;
 }
@@ -58,7 +67,32 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
+    int status;
+    pid_t pid = fork();
 
+    if (pid < 0)
+        return false;
+    else if (pid == 0)
+    {
+        printf("Running execv...\n");
+        printf("systemcalls.c::do_exec execv( %s, [%s, %s, %s, %s] )", command[0], command[0], command[1], command[2], command[3]);
+        if(execv(command[0], command) == -1) {
+            printf("execv failed! errno = %d (%s)\n", errno, strerror(errno));
+            return false;
+        }
+    }
+    
+    printf("Parent process waiting for child with PID: %d\n", pid);
+    waitpid(pid, &status, 0); // Wait for the specific child
+    if (WIFEXITED(status) && (WEXITSTATUS(status) == 0)) {
+        printf("Child process exited with status: %d\n", WEXITSTATUS(status));
+        return true;
+    }
+    else 
+    { 
+        return false;
+    }
+    
     va_end(args);
 
     return true;
@@ -92,6 +126,25 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   The rest of the behaviour is same as do_exec()
  *
 */
+    pid_t pid;
+    int status;
+    int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+    if (fd < 0) { perror("open"); abort(); }
+    switch (pid = fork()) {
+    case -1: perror("fork"); abort();
+    case 0:
+        if (dup2(fd, 1) < 0) { perror("dup2"); abort(); }
+        close(fd);
+        execvp(command[0], command); perror("execvp"); abort();
+    default:
+        close(fd);
+        waitpid(pid, &status, 0);
+        if (WIFEXITED(status) && (WEXITSTATUS(status) == 0)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     va_end(args);
 
