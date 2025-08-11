@@ -58,6 +58,8 @@ bool do_exec(int count, ...)
     // and may be removed
     command[count] = command[count];
 
+    va_end(args);
+
 /*
  * TODO:
  *   Execute a system command by calling fork, execv(),
@@ -92,10 +94,6 @@ bool do_exec(int count, ...)
     { 
         return false;
     }
-    
-    va_end(args);
-
-    return true;
 }
 
 /**
@@ -118,6 +116,7 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     // and may be removed
     command[count] = command[count];
 
+    va_end(args);
 
 /*
  * TODO
@@ -145,8 +144,4 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
             return false;
         }
     }
-
-    va_end(args);
-
-    return true;
 }
