@@ -84,12 +84,12 @@ make CONFIG_PREFIX=${OUTDIR}/rootfs ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} 
 # Make BusyBox binary setuid root
 chmod u+s ${OUTDIR}/rootfs/bin/busybox
 
-echo "Library dependencies"
+echo "===== Library dependencies ====="
 ${CROSS_COMPILE}readelf -a ${OUTDIR}/rootfs/bin/busybox | grep "program interpreter"
 ${CROSS_COMPILE}readelf -a ${OUTDIR}/rootfs/bin/busybox | grep "Shared library"
 
 # TODO: Add library dependencies to rootfs
-echo "Add library dependencies to rootfs"
+echo "===== Add library dependencies to rootfs ====="
 SYSROOT=$(${CROSS_COMPILE}gcc -print-sysroot)
 
 cp -a ${SYSROOT}/lib/ld-linux-aarch64.so.1 ${OUTDIR}/rootfs/lib
@@ -98,25 +98,26 @@ cp -a ${SYSROOT}/lib64/libresolv.so.* ${OUTDIR}/rootfs/lib64
 cp -a ${SYSROOT}/lib64/libc.so.* ${OUTDIR}/rootfs/lib64
 
 # TODO: Make device nodes
-echo "Make devie nodes"
+echo "===== Make devie nodes ====="
 cd ${OUTDIR}/rootfs
 sudo mknod -m 666 dev/null c 1 3
 sudo mknod -m 600 dev/console c 5 1
 
 # TODO: Clean and build the writer utility
-echo "Clean and build the writer utility"
+echo "===== Clean and build the writer utility ====="
 export CROSS_COMPILE=${CROSS_COMPILE}
 make -C "${FINDER_APP_DIR}" clean
 make -C "${FINDER_APP_DIR}" all
 
 # TODO: Copy the finder related scripts and executables to the /home directory
 # on the target rootfs
-echo "Copy the finder related scripts and executables to the /home directory on the target rootfs"
-cp -r ${FINDER_APP_DIR}/* ${OUTDIR}/rootfs/home
+echo "===== Copy the finder related scripts and executables to the /home directory on the target rootfs ====="
+cd ${FINDER_APP_DIR}
+cp -r * ${OUTDIR}/rootfs/home
 cp -r ../conf ${OUTDIR}/rootfs
 
 # TODO: Chown the root directory
-echo "Chown the root directory"
+echo "===== Chown the root directory ====="
 cd ${OUTDIR}/rootfs
 sudo chown -R root:root *
 
