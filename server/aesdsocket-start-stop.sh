@@ -20,8 +20,8 @@ start() {
         return 1
     fi
     
-    make clean
-    make all
+    # make clean
+    # make all
     echo "Starting aesdsocket..."
     $APP $ARGS
     sleep 0.5   # give it a moment to fork
